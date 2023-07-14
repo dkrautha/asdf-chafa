@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for chafa.
 GH_REPO="https://github.com/hpjansson/chafa/"
 TOOL_NAME="chafa"
 TOOL_TEST="chafa --version"
@@ -31,8 +30,6 @@ list_github_tags() {
 }
 
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if chafa has other means of determining installable versions.
 	list_github_tags
 }
 
@@ -41,8 +38,18 @@ download_release() {
 	version="$1"
 	filename="$2"
 
-	# TODO: Adapt the release URL convention for chafa
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	local platform kernel arch
+	kernel="$(uname -s)"
+	arch="$(uname -m)"
+
+	case "$kernel" in
+	Linux)
+		platform="${arch}-linux-gnu"
+		;;
+	esac
+
+	local download_url="https://hpjansson.org/chafa/releases/static/"
+	url="$download_url/chafa-${version}-1-{$platform}.tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
